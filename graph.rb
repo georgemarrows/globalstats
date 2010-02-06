@@ -153,7 +153,7 @@ puts <<END
          }
          .axis {
            stroke: #8FAC8F;
-}
+         }
          line.axis {
            stroke-width: 2;           
          }
@@ -178,8 +178,6 @@ puts <<END
      <g transform="scale(0.6,0.6)">
      #{graphs}
      </g>
-     <image x="400" y="275" width="269" height="180"
-          xlink:href="../cities/foreign_born.png" />
 
 </svg>
 END
