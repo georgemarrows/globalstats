@@ -72,16 +72,14 @@ end
 class TufteAxis < Axis
   def ticks(data)
     x,y = directions
-    #FIXME move text anchor to right to deal with this better
     min, max = scale(data.min), scale(data.max)
-    mintextx = -8 * data.min.to_s.length - 4
-    maxtextx = -8 * data.max.to_s.length - 4    
+    textx = -8
     ticks = %{
       <line class='axis line' #{x}1='#{min}' #{y}1='-1' #{x}2='#{max}' #{y}2='-1' />      
       <line class='axis tick' #{x}1='#{min}' #{y}1='-1' #{x}2='#{min}' #{y}2='#{-1-TICK_SIZE}' />
       <line class='axis tick' #{x}1='#{max}' #{y}1='-1' #{x}2='#{max}' #{y}2='#{-1-TICK_SIZE}' />      
-      <g transform='translate(0,#{min-3}) scale(1,-1)'><text class='axis label' x='#{mintextx}' y='0'>#{data.min}</text></g>
-      <g transform='translate(0,#{max-3}) scale(1,-1)'><text class='axis label' x='#{maxtextx}' y='0'>#{data.max}</text></g>      
+      <g transform='translate(0,#{min-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{data.min}</text></g>
+      <g transform='translate(0,#{max-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{data.max}</text></g>      
     }
     
    
@@ -155,9 +153,11 @@ puts <<END
            stroke: #8FAC8F;
          }
          line.axis {
-           stroke-width: 2;           
+           stroke-width: 2;      
          }
-
+         text.axis {
+           text-anchor: end;              
+         }
          .data {
            stroke: rgb(255,0,0);
            stroke-width: 2;
