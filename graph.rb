@@ -17,6 +17,18 @@ cities= [[[11275,13713,16679,20284,23298,26615,28549,30304,32530,33587,34450,353
          [[4513,5055,5652,6261,6926,7888,9030,9946,10890,11924,13058,14282,14787,15577,17039,18707],          "Kolkata"],
          
          ]
+         
+urban_growth = [
+         [[63.9,67.0,69.9,72.0,73.8,73.8,73.9,74.7,75.4,77.3,79.1,80.7,82.1,83.4,84.6],"Northern America"],
+         [[41.4,45.1,48.9,53.0,57.0,61.1,64.9,67.9,70.6,73.0,75.3,77.5,79.4,80.9,82.3],"Latin America and the Caribbean"],
+         [[51.2,54.0,56.9,60.0,62.8,65.7,68.0,69.4,70.5,71.0,71.4,71.9,72.6,73.5,74.8],"Europe"],
+         [[62.0,64.3,66.6,68.8,70.8,71.5,71.3,70.7,70.6,70.5,70.4,70.5,70.6,70.9,71.4],"Oceania"],
+         [[29.1,30.9,32.9,34.7,36.0,37.3,39.1,40.9,43.0,44.7,46.6,48.6,50.6,52.7,54.9],"World"],
+         [[16.8,18.2,19.8,21.5,22.7,24.0,26.3,29.0,31.9,34.4,37.1,39.7,42.5,45.3,48.1],"Asia"],
+         [[14.5,16.4,18.7,21.3,23.6,25.7,27.9,29.9,32.0,34.1,35.9,37.9,39.9,42.2,44.6],"Africa"],
+       ]
+         
+         
 YMIN = 0
 YMAX = 38
 
@@ -94,7 +106,7 @@ class DataSeries
     @xaxis = xaxis
     @yaxis = yaxis
   end
-  def draw(xseries, yseries)
+  def draw(xseries, yseries, cssclass)
     paired = []
     xseries.each_with_index do |x, k|
       paired << [x, yseries[k]]
@@ -103,10 +115,10 @@ class DataSeries
     draw_type = "M"
     graph_path = paired.map do |x, y|
       tmp = draw_type; draw_type = "L"
-      "#{tmp} #{XAXIS.scale(x)} #{YAXIS.scale(y)}"
+      "#{tmp} #{@xaxis.scale(x)} #{@yaxis.scale(y)}"
     end.join(" ")
 
-    "<path class='data' d='#{graph_path}' />"
+    "<path class='data #{cssclass}' d='#{graph_path}' />"
   end
 end
 
@@ -125,7 +137,26 @@ graphs = cities.map do |c, name|
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.ticks(xindex, 2)} 
 #{YAXIS.ticks(city_data)}
-#{data.draw(xindex, city_data)}
+#{data.draw(xindex, city_data, "cities")}
+
+</g>
+}
+end.join("\n")
+
+yaxis = TufteAxis.new(HEIGHT, 0, 100, :y)
+data = DataSeries.new(XAXIS, yaxis)
+
+graphs += urban_growth.map_with_index do |data_and_name, index|
+  region_data, name = *data_and_name
+  fcstx = XAXIS.scale(2010)
+  fcstwidth = XAXIS.scale(2020) - fcstx
+  %{
+<g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index + 1) )}, -400)  ">
+<g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
+<rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
+#{XAXIS.ticks(xindex, 2)} 
+#{yaxis.ticks(region_data)}
+#{data.draw(xindex, region_data, "urban")}
 
 </g>
 }
@@ -162,6 +193,9 @@ puts <<END
            stroke: rgb(255,0,0);
            stroke-width: 2;
            fill: none;
+         }
+         .urban {
+           stroke: rgb(0,255,0);
          }
          text {
            stroke: #8FAC8F;
