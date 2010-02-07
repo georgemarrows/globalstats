@@ -83,42 +83,51 @@ class Axis
       raise "Unknown direction #{@direction}"
     end
   end
-  def draw(data, skip=1)
-    x,y = directions
-    data = data.map_with_index {|d, ndx| if ndx % skip == 0 then d else false end}
-    ticks = data.map do |val|
-      if val
-      then
-        v = scale(val)
-        %{<line class='axis ticks' #{x}1='#{v}' #{y}1='0' #{x}2='#{v}' #{y}2='#{-TICK_SIZE}' />}
-      else
-        ""
-      end
-      
-    end.join("")
-    ticks += %{ <line class="axis line" x1="0" y1="0"  x2="#{@size}" y2="0" /> }
+  def draw(data, options = {})
+    options = {:ticks_every => 1}.merge(options)
+    draw_ticks(data, options)
   end  
-end
-
-class TufteAxis < Axis
-  def draw(data)
-    x,y = directions
+  private
+  def draw_ticks(data, options)
+    if options[:ticks_every] == :min_max_only
+    then  
+      draw_min_max_ticks(data)
+    else
+      draw_all_ticks(data, options[:ticks_every])
+    end
+  end
+  def draw_min_max_ticks(data)
+    x,y = directions  
     min, max = scale(data.min), scale(data.max)
     textx = -8
-    ticks = %{
+    %{
       <line class='axis line' #{x}1='#{min}' #{y}1='-1' #{x}2='#{max}' #{y}2='-1' />      
       <line class='axis tick' #{x}1='#{min}' #{y}1='-1' #{x}2='#{min}' #{y}2='#{-1-TICK_SIZE}' />
       <line class='axis tick' #{x}1='#{max}' #{y}1='-1' #{x}2='#{max}' #{y}2='#{-1-TICK_SIZE}' />      
       <g transform='translate(0,#{min-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{data.min}</text></g>
       <g transform='translate(0,#{max-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{data.max}</text></g>      
     }
-    
-   
+  end
+  def draw_all_ticks(data, skip)
+    x,y = directions    
+    data = data.map_with_index {|d, ndx| if ndx % skip == 0 then d else false end}
+    ticks = data.map do |val|
+      if val
+        then
+        v = scale(val)
+        %{<line class='axis ticks' #{x}1='#{v}' #{y}1='0' #{x}2='#{v}' #{y}2='#{-TICK_SIZE}' />}
+      else
+        ""
+      end
+    end.join("")
+    ticks + %{ <line class="axis line" x1="0" y1="0"  x2="#{@size}" y2="0" /> }
   end
 end
 
+
+
 XAXIS = Axis.new(WIDTH, XMIN, XMAX, :x)
-YAXIS = TufteAxis.new(HEIGHT, YMIN, YMAX, :y)
+YAXIS = Axis.new(HEIGHT, YMIN, YMAX, :y)
 
 class DataSeries
   def initialize(xaxis, yaxis)
@@ -152,29 +161,27 @@ graphs = cities.map do |c, name|
 <g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index+=1) )}, -200)  ">
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
-#{XAXIS.draw(xindex, 2)} 
-#{YAXIS.draw(city_data)}
+#{XAXIS.draw(xindex, :ticks_every => 2)} 
+#{YAXIS.draw(city_data, :ticks_every => :min_max_only)}
 #{data.draw(xindex, city_data, "cities")}
 
 </g>
 }
 end.join("\n")
 
-#yaxis = TufteAxis.new(HEIGHT, 0, 100, :y)
-#data = DataSeries.new(XAXIS, yaxis)
 
 graphs += total_urban.map_with_index do |data_and_name, index|
   name, total_data, urban_data = *data_and_name
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
-  yaxis = TufteAxis.new(HEIGHT, 0, total_data.max, :y)
+  yaxis = Axis.new(HEIGHT, 0, total_data.max, :y)
   data = DataSeries.new(XAXIS, yaxis)
   %{
 <g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index + 1) )}, -400)  ">
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
-#{XAXIS.draw(xindex, 2)} 
-#{yaxis.draw(total_data)}
+#{XAXIS.draw(xindex, :ticks_every => 2)} 
+#{yaxis.draw(total_data, :ticks_every => :min_max_only)}
 #{data.draw(xindex, total_data, "total")}
 #{data.draw(xindex, urban_data, "urban")}
 </g>
