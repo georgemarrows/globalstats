@@ -83,7 +83,7 @@ class Axis
       raise "Unknown direction #{@direction}"
     end
   end
-  def ticks(data, skip=1)
+  def draw(data, skip=1)
     x,y = directions
     data = data.map_with_index {|d, ndx| if ndx % skip == 0 then d else false end}
     ticks = data.map do |val|
@@ -101,7 +101,7 @@ class Axis
 end
 
 class TufteAxis < Axis
-  def ticks(data)
+  def draw(data)
     x,y = directions
     min, max = scale(data.min), scale(data.max)
     textx = -8
@@ -152,8 +152,8 @@ graphs = cities.map do |c, name|
 <g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index+=1) )}, -200)  ">
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
-#{XAXIS.ticks(xindex, 2)} 
-#{YAXIS.ticks(city_data)}
+#{XAXIS.draw(xindex, 2)} 
+#{YAXIS.draw(city_data)}
 #{data.draw(xindex, city_data, "cities")}
 
 </g>
@@ -173,8 +173,8 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 <g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index + 1) )}, -400)  ">
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
-#{XAXIS.ticks(xindex, 2)} 
-#{yaxis.ticks(total_data)}
+#{XAXIS.draw(xindex, 2)} 
+#{yaxis.draw(total_data)}
 #{data.draw(xindex, total_data, "total")}
 #{data.draw(xindex, urban_data, "urban")}
 </g>
@@ -182,8 +182,8 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 end.join("\n")
 
 #    <g transform="scale(1,-1) translate(50,#{-HEIGHT-50})">
-#    #{XAXIS.ticks(xindex)} 
-#    #{YAXIS.ticks([0,10,20,30,40])}
+#    #{XAXIS.draw(xindex)} 
+#    #{YAXIS.draw([0,10,20,30,40])}
 #    #{data.draw(xindex, tokyo)}
 #    </g>
 
