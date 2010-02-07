@@ -45,6 +45,16 @@ total_urban = [  # format: country, total pop in 1000s, urban pop in 1000s
         ["India",
           [371857,405529,445981,493868,549312,613767,688575,771121,860195,954282,1046235,1134403,1220182,1302535,1379198],
           [63373,71301,79938,92773,108546,130927,159046,187754,219758,253774,289438,325563,366858,415612,472561]],
+        ["Bangladesh",
+          [43852,48415,54253,61479,69817,78993,88855,100532,113049,126297,139434,153281,166638,180114,193333],
+          [1878,2269,2786,3818,5301,7770,13196,17589,22396,27398,32893,39351,46770,55474,65523]],          
+        ["Ethiopia",  
+          [18434,20474,22942,26087,29831,34188,37138,43437,51148,60293,69388,78986,89566,100967,112896],
+          [848,1115,1476,1979,2562,3234,3866,4975,6455,8381,10339,12687,15722,19564,24369]],
+        ["USA",  
+          [157813,171074,186158,199386,210111,220165,230917,243063,256098,270245,284857,299846,314692,329010,342547],
+          [101242,114899,130302,143316,154647,162157,170274,181069,192842,208779,225319,242236,258998,275248,290729]],    
+          
        ];
 
          
@@ -188,6 +198,10 @@ graphs += total_urban.map_with_index do |data_and_name, index|
   fcstwidth = XAXIS.scale(2020) - fcstx
   yaxis = Axis.new(HEIGHT, 0, total_data.max, :y)
   data = DataSeries.new(XAXIS, yaxis)
+  
+  urban_percent_start = (100.0 * urban_data[0] / total_data[0]).round().to_s + "%"
+  urban_percent_end   = (100.0 * urban_data[-1] / total_data[-1]).round().to_s + "%"
+  
   %{
 <g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index + 1) )}, -400)  ">
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
@@ -196,6 +210,12 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 #{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => label_formatter)}
 #{data.draw(xindex, total_data, "total")}
 #{data.draw(xindex, urban_data, "urban")}
+<g transform='translate(0, #{yaxis.scale(urban_data.min)-4}) scale(1,-1)'>
+<text class='axis' x='-8' y='0'>#{urban_percent_start}</text>
+</g>
+<g transform='translate(0, #{yaxis.scale(urban_data.max)-4}) scale(1,-1)'>
+<text class='axis' x='#{WIDTH+8}' y='0'>#{urban_percent_end}</text>
+</g>
 </g>
 }
 end.join("\n")
