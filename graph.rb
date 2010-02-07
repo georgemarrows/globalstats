@@ -49,7 +49,7 @@ total_urban = [  # format: country, total, urban
 
          
 YMIN = 0
-YMAX = 38
+YMAX = 38000
 
 TICK_SIZE = 3
 
@@ -84,8 +84,9 @@ class Axis
     end
   end
   def draw(data, options = {})
-    options = {:ticks_every => 1}.merge(options)
-    draw_ticks(data, options)
+    options = {:ticks_every => 1,
+               :label_formatter => proc {|x| ""}}.merge(options)
+    draw_ticks(data, options) + draw_labels(data, options)
   end  
   private
   def draw_ticks(data, options)
@@ -99,13 +100,10 @@ class Axis
   def draw_min_max_ticks(data)
     x,y = directions  
     min, max = scale(data.min), scale(data.max)
-    textx = -8
     %{
       <line class='axis line' #{x}1='#{min}' #{y}1='-1' #{x}2='#{max}' #{y}2='-1' />      
       <line class='axis tick' #{x}1='#{min}' #{y}1='-1' #{x}2='#{min}' #{y}2='#{-1-TICK_SIZE}' />
       <line class='axis tick' #{x}1='#{max}' #{y}1='-1' #{x}2='#{max}' #{y}2='#{-1-TICK_SIZE}' />      
-      <g transform='translate(0,#{min-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{data.min}</text></g>
-      <g transform='translate(0,#{max-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{data.max}</text></g>      
     }
   end
   def draw_all_ticks(data, skip)
@@ -121,6 +119,15 @@ class Axis
       end
     end.join("")
     ticks + %{ <line class="axis line" x1="0" y1="0"  x2="#{@size}" y2="0" /> }
+  end
+  def draw_labels(data, options)
+    label_formatter = options[:label_formatter]
+    textx = -8    
+    min, max = scale(data.min), scale(data.max)    
+    %{
+      <g transform='translate(0,#{min-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{label_formatter.call(data.min)}</text></g>
+      <g transform='translate(0,#{max-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{label_formatter.call(data.max)}</text></g>
+    }
   end
 end
 
@@ -153,8 +160,7 @@ end
 data = DataSeries.new(XAXIS, YAXIS)
 
 index = 0
-graphs = cities.map do |c, name|
-  city_data = c.map {|x| (x/100.0).round()/10.0}
+graphs = cities.map do |city_data, name|
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
   %{
@@ -162,7 +168,7 @@ graphs = cities.map do |c, name|
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
-#{YAXIS.draw(city_data, :ticks_every => :min_max_only)}
+#{YAXIS.draw(city_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| ((x/100.0).round()/10.0).to_s + "m"})}
 #{data.draw(xindex, city_data, "cities")}
 
 </g>
@@ -172,6 +178,12 @@ end.join("\n")
 
 graphs += total_urban.map_with_index do |data_and_name, index|
   name, total_data, urban_data = *data_and_name
+  label_formatter = if total_data.max > 500000
+    proc {|x| ((x/100000.0).round()/10.0).to_s + "b"}
+  else
+    proc {|x| ((x/1000.0).round()).to_s + "m"}
+  end
+  
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
   yaxis = Axis.new(HEIGHT, 0, total_data.max, :y)
@@ -181,7 +193,7 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
-#{yaxis.draw(total_data, :ticks_every => :min_max_only)}
+#{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => label_formatter)}
 #{data.draw(xindex, total_data, "total")}
 #{data.draw(xindex, urban_data, "urban")}
 </g>
