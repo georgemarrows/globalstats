@@ -160,21 +160,23 @@ graphs = cities.map do |c, name|
 }
 end.join("\n")
 
-yaxis = TufteAxis.new(HEIGHT, 0, 100, :y)
-data = DataSeries.new(XAXIS, yaxis)
+#yaxis = TufteAxis.new(HEIGHT, 0, 100, :y)
+#data = DataSeries.new(XAXIS, yaxis)
 
-graphs += urban_growth.map_with_index do |data_and_name, index|
-  region_data, name = *data_and_name
+graphs += total_urban.map_with_index do |data_and_name, index|
+  name, total_data, urban_data = *data_and_name
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
+  yaxis = TufteAxis.new(HEIGHT, 0, total_data.max, :y)
+  data = DataSeries.new(XAXIS, yaxis)
   %{
 <g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index + 1) )}, -400)  ">
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.ticks(xindex, 2)} 
-#{yaxis.ticks(region_data)}
-#{data.draw(xindex, region_data, "urban")}
-
+#{yaxis.ticks(total_data)}
+#{data.draw(xindex, total_data, "total")}
+#{data.draw(xindex, urban_data, "urban")}
 </g>
 }
 end.join("\n")
