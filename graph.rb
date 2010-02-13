@@ -238,27 +238,25 @@ puts <<END
          .forecast {
            fill: rgb(230, 230, 230);
          }
-         .axis {
-           stroke: #8FAC8F;
-         }
          line.axis {
-           stroke-width: 2;      
+           stroke: #8FAC8F;
+           stroke-width: 0.25pt;      
          }
          text.axis {
            text-anchor: end;              
          }
          .data {
            stroke: rgb(255,0,0);
-           stroke-width: 2;
+           stroke-width: 1pt;
            fill: none;
          }
          .urban {
            stroke: rgb(0,255,0);
          }
          text {
-           stroke: #8FAC8F;
-           fill: #8FAC8F;
-           font-family: "GillSans";
+          /* stroke: #8FAC8F; */
+           fill: #8FAC8F; 
+           font-family: "Helvetica Neue LT Std";
            font-size: 16px;
          }
          text.title {
