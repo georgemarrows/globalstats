@@ -13,8 +13,8 @@ cities= [[[11275,13713,16679,20284,23298,26615,28549,30304,32530,33587,34450,353
          [[2883,3801,5012,6653,8769,10690,13010,14109,15312,16811,18022,18735,19028,19485,20189,20695],       "Mexico City"],        
          [[1369,1782,2283,2845,3531,4426,5558,6769,8206,10092,12441,15053,15926,17015,18669,20484],           "Delhi"],
          [[12338,13219,14164,15177,16191,15880,15601,15827,16086,16943,17846,18732,19040,19441,19974,20370],  "New York"],
-         [[336,409,508,821,1374,2221,3266,4660,6621,8332,10285,12576,13485,14796,17015,19422],                "Dhaka"],
-         [[4513,5055,5652,6261,6926,7888,9030,9946,10890,11924,13058,14282,14787,15577,17039,18707],          "Kolkata"],
+         #[[336,409,508,821,1374,2221,3266,4660,6621,8332,10285,12576,13485,14796,17015,19422],                "Dhaka"],
+         #[[4513,5055,5652,6261,6926,7888,9030,9946,10890,11924,13058,14282,14787,15577,17039,18707],          "Kolkata"],
          
          ]
          
@@ -36,9 +36,9 @@ total_urban = [  # format: country, total pop in 1000s, urban pop in 1000s
         ["USA",  
           [157813,171074,186158,199386,210111,220165,230917,243063,256098,270245,284857,299846,314692,329010,342547],
           [101242,114899,130302,143316,154647,162157,170274,181069,192842,208779,225319,242236,258998,275248,290729]],      
-        ["Mexico",
-          [27741,32253,37877,44406,52028,60713,69325,76826,84002,91823,99735,104266,110293,115756,120559],
-          [11833,15056,19224,24393,30707,38103,45990,52971,59994,67368,74524,79564,85839,91777,97265]],
+        #["Mexico",
+        #  [27741,32253,37877,44406,52028,60713,69325,76826,84002,91823,99735,104266,110293,115756,120559],
+        #  [11833,15056,19224,24393,30707,38103,45990,52971,59994,67368,74524,79564,85839,91777,97265]],
         ["Japan",
           [83625,89815,94096,98881,104331,111524,116807,120837,123537,125472,127034,127897,127758,126607,124489],
           [29145,34928,40542,46852,55508,63373,69577,73173,77944,81098,82847,84363,85385,86082,86420]],
@@ -48,9 +48,9 @@ total_urban = [  # format: country, total pop in 1000s, urban pop in 1000s
         ["India",
           [371857,405529,445981,493868,549312,613767,688575,771121,860195,954282,1046235,1134403,1220182,1302535,1379198],
           [63373,71301,79938,92773,108546,130927,159046,187754,219758,253774,289438,325563,366858,415612,472561]],
-        ["Bangladesh",
-          [43852,48415,54253,61479,69817,78993,88855,100532,113049,126297,139434,153281,166638,180114,193333],
-          [1878,2269,2786,3818,5301,7770,13196,17589,22396,27398,32893,39351,46770,55474,65523]],          
+        #["Bangladesh",
+        #  [43852,48415,54253,61479,69817,78993,88855,100532,113049,126297,139434,153281,166638,180114,193333],
+        #  [1878,2269,2786,3818,5301,7770,13196,17589,22396,27398,32893,39351,46770,55474,65523]],          
         ["Ethiopia",  
           [18434,20474,22942,26087,29831,34188,37138,43437,51148,60293,69388,78986,89566,100967,112896],
           [848,1115,1476,1979,2562,3234,3866,4975,6455,8381,10339,12687,15722,19564,24369]],
@@ -175,8 +175,9 @@ graphs = cities.map do |city_data, name|
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
   %{
-<g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index+=1) )}, -400)  ">
-<g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
+<g transform="scale(1,-1) translate(#{(2 * WIDTH * (index+=1) )}, -500)  ">
+<g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
+<rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{YAXIS.draw(city_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| ((x/100.0).round()/10.0).to_s + "m"})}
@@ -204,18 +205,19 @@ graphs += total_urban.map_with_index do |data_and_name, index|
   urban_percent_end   = (100.0 * urban_data[-1] / total_data[-1]).round().to_s + "%"
   
   %{
-<g transform="scale(1,-1) translate(#{(1.6 * HEIGHT * (index + 1) )}, -200)  ">
-<g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='0' y='0'>#{name}</text></g>
+<g transform="scale(1,-1) translate(#{(2 * WIDTH * (index + 1) )}, -200)  ">
+<g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
+<rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => label_formatter)}
 #{data.draw(xindex, total_data, "total")}
 #{data.draw(xindex, urban_data, "urban")}
-<g transform='translate(0, #{yaxis.scale(urban_data.min)-4}) scale(1,-1)'>
-<text class='axis series_label left' x='-4' y='0'>#{urban_percent_start}</text>
+<g transform='translate(0, #{yaxis.scale(urban_data.min)-6}) scale(1,-1)'>
+<text class='series_label left' x='-4' y='0'>#{urban_percent_start}</text>
 </g>
-<g transform='translate(0, #{yaxis.scale(urban_data.max)-4}) scale(1,-1)'>
-<text class='axis series_label right' x='#{WIDTH+4}' y='0'>#{urban_percent_end}</text>
+<g transform='translate(0, #{yaxis.scale(urban_data.max)-6}) scale(1,-1)'>
+<text class='series_label right' x='#{WIDTH+4}' y='0'>#{urban_percent_end}</text>
 </g>
 </g>
 }
@@ -233,13 +235,15 @@ puts <<END
          .forecast {
            fill: rgb(230, 230, 230);
          }
+         .background {
+           fill: rgb(255, 255, 255);
+         }
+       
          line.axis {
-           stroke: #8FAC8F;
+           stroke: rgb(0,0,0);
            stroke-width: 0.25pt;      
          }
-         text.axis {
-           text-anchor: end;              
-         }
+
          .data {
            stroke-width: 1pt;
            fill: none;
@@ -255,20 +259,24 @@ puts <<END
          }
          text {
           /* stroke: #8FAC8F; */
-           fill: #8FAC8F; 
+           fill: rgb(0,0,0); 
            font-family: "Helvetica Neue LT Std";
            font-size: 16px;
          }
          text.title {
            font-size: 20px;
+           text-anchor: middle;
          }
-         text.series_label.right {
+         text {
+           text-anchor: end;              
+         }
+         text.right {
            text-anchor: start;  
          }
          
        ]]></style>
      </defs> 
-     <g transform="scale(0.6,0.6)">
+     <g transform="scale(0.5,0.5)">
      #{graphs}
      </g>
 
