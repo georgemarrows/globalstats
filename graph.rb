@@ -133,13 +133,22 @@ class Axis
   end
   def draw_labels(data, options)
     label_formatter = options[:label_formatter]
-    textx = -8    
-    min, max = scale(data.min), scale(data.max)    
-    %{
-      <g transform='translate(0,#{min-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{label_formatter.call(data.min)}</text></g>
-      <g transform='translate(0,#{max-3}) scale(1,-1)'><text class='axis label' x='#{textx}' y='0'>#{label_formatter.call(data.max)}</text></g>
-    }
+    label_at(scale(data.min), label_formatter.call(data.min)) + 
+    label_at(scale(data.max), label_formatter.call(data.max))
   end
+  def label_at(coord, text)
+    translate = case @direction
+    when :x
+      [coord, -8-4]
+    when :y
+      [-8, coord-4]
+    end.join(',')
+
+    %{ <g transform='translate(#{translate}) scale(1,-1)'>
+         <text class='axis #{@direction}label' x='0' y='0'>#{text}</text>
+       </g> }
+  end
+
 end
 
 
@@ -190,11 +199,16 @@ end.join("\n")
 
 graphs += total_urban.map_with_index do |data_and_name, index|
   name, total_data, urban_data = *data_and_name
-  label_formatter = if total_data.max > 500000
+  ylabel_formatter = if total_data.max > 500000
     proc {|x| ((x/100000.0).round()/10.0).to_s + "b"}
   else
     proc {|x| ((x/1000.0).round()).to_s + "m"}
   end
+  xlabel_formatter = if index == 0
+    proc {|x| x }
+  else
+    proc {|x| ""}
+  end  
   
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
@@ -209,8 +223,8 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 <g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
 <rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
-#{XAXIS.draw(xindex, :ticks_every => 2)} 
-#{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => label_formatter)}
+#{XAXIS.draw(xindex, :ticks_every => 2, :label_formatter => xlabel_formatter)} 
+#{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => ylabel_formatter)}
 #{data.draw(xindex, total_data, "total")}
 #{data.draw(xindex, urban_data, "urban")}
 <g transform='translate(0, #{yaxis.scale(urban_data.min)-6}) scale(1,-1)'>
@@ -222,6 +236,8 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 </g>
 }
 end.join("\n")
+
+background = %{<rect style='fill:rgb(233,237,247)' x='0' y='0' width='#{2*WIDTH*(total_urban.size+1)}' height='#{600}' />}
 
 puts <<END
 <?xml version="1.0" standalone="no"?>
@@ -245,7 +261,7 @@ puts <<END
          }
 
          .data {
-           stroke-width: 1pt;
+           stroke-width: 2pt;
            fill: none;
          }
          .cities {
@@ -273,10 +289,14 @@ puts <<END
          text.right {
            text-anchor: start;  
          }
+         text.xlabel {
+           text-anchor: middle;
+         }
          
        ]]></style>
      </defs> 
      <g transform="scale(0.5,0.5)">
+     #{background}     
      #{graphs}
      </g>
 
