@@ -183,12 +183,17 @@ index = 0
 graphs = cities.map do |city_data, name|
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
+  xlabel_formatter = if index == 0
+    proc {|x| x }
+  else
+    proc {|x| ""}
+  end 
   %{
 <g transform="scale(1,-1) translate(#{(2 * WIDTH * (index+=1) )}, -500)  ">
 <g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
 <rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
-#{XAXIS.draw(xindex, :ticks_every => 2)} 
+#{XAXIS.draw(xindex, :ticks_every => 2, :label_formatter => xlabel_formatter)} 
 #{YAXIS.draw(city_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| ((x/100.0).round()/10.0).to_s + "m"})}
 #{data.draw(xindex, city_data, "cities")}
 
