@@ -75,6 +75,7 @@ class Array
 end
 
 class Axis
+  attr_reader :size
   def initialize(size, min, max, direction)
     @size = size
     @min = min
@@ -183,8 +184,8 @@ class DataSeries
     max = yseries[-1]
     mintext = options[:label_formatter].call(min, 0)
     maxtext = options[:label_formatter].call(max, -1)
-    label_at(-4,      @yaxis.scale(min), mintext, 'left') +
-    label_at(WIDTH+4, @yaxis.scale(max), maxtext, 'right')
+    label_at(-4,            @yaxis.scale(min), mintext, 'left') +
+    label_at(@xaxis.size+4, @yaxis.scale(max), maxtext, 'right')
   end
   def label_at(x, y, text, side)
     %{
