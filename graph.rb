@@ -208,8 +208,7 @@ graphs = cities.map do |city_data, name|
 <rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
-#{YAXIS.draw(city_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| ((x/100.0).round()/10.0).to_s + "m"})}
-#{data.draw(xindex, city_data, "cities", :labels => :none)}
+#{data.draw(xindex, city_data, "cities", :labels => :startend, :label_formatter => proc {|x, i| ((x/100.0).round()/10.0).to_s + "m"}) }
 
 </g>
 }
@@ -219,9 +218,9 @@ end.join("\n")
 graphs += total_urban.map_with_index do |data_and_name, index|
   name, total_data, urban_data = *data_and_name
   ylabel_formatter = if total_data.max > 500000
-    proc {|x| ((x/100000.0).round()/10.0).to_s + "b"}
+    proc {|x,i| ((x/100000.0).round()/10.0).to_s + "b"}
   else
-    proc {|x| ((x/1000.0).round()).to_s + "m"}
+    proc {|x,i| ((x/1000.0).round()).to_s + "m"}
   end
   
   fcstx = XAXIS.scale(2010)
@@ -239,8 +238,7 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 <rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
-#{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => ylabel_formatter)}
-#{data.draw(xindex, total_data, "total", :labels => :none)}
+#{data.draw(xindex, total_data, "total", :labels => :startend, :label_formatter => ylabel_formatter)}
 #{data.draw(xindex, urban_data, "urban", :labels => :startend, :label_formatter => endlabel_formatter)}
 </g>
 }
