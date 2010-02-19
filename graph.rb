@@ -96,7 +96,7 @@ class Axis
   end
   def draw(data, options = {})
     options = {:ticks_every => 1,
-               :label_formatter => proc {|x| ""}}.merge(options)
+               :label_formatter => proc {|x| x}}.merge(options)
     draw_ticks(data, options) + draw_labels(data, options)
   end  
   private
@@ -139,7 +139,7 @@ class Axis
   def label_at(coord, text)
     translate = case @direction
     when :x
-      [coord, -8-4]
+      [coord, -8-16]
     when :y
       [-8, coord-4]
     end.join(',')
@@ -183,17 +183,13 @@ index = 0
 graphs = cities.map do |city_data, name|
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
-  xlabel_formatter = if index == 0
-    proc {|x| x }
-  else
-    proc {|x| ""}
-  end 
+
   %{
 <g transform="scale(1,-1) translate(#{(2 * WIDTH * (index+=1) )}, -500)  ">
 <g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
 <rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
-#{XAXIS.draw(xindex, :ticks_every => 2, :label_formatter => xlabel_formatter)} 
+#{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{YAXIS.draw(city_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| ((x/100.0).round()/10.0).to_s + "m"})}
 #{data.draw(xindex, city_data, "cities")}
 
@@ -209,11 +205,6 @@ graphs += total_urban.map_with_index do |data_and_name, index|
   else
     proc {|x| ((x/1000.0).round()).to_s + "m"}
   end
-  xlabel_formatter = if index == 0
-    proc {|x| x }
-  else
-    proc {|x| ""}
-  end  
   
   fcstx = XAXIS.scale(2010)
   fcstwidth = XAXIS.scale(2020) - fcstx
@@ -228,7 +219,7 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 <g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
 <rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
-#{XAXIS.draw(xindex, :ticks_every => 2, :label_formatter => xlabel_formatter)} 
+#{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => ylabel_formatter)}
 #{data.draw(xindex, total_data, "total")}
 #{data.draw(xindex, urban_data, "urban")}
