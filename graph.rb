@@ -178,17 +178,18 @@ class DataSeries
     "<path class='data #{cssclass}' d='#{graph_path}' />" + draw_labels(xseries, yseries, options)
   end
   def draw_labels(xseries, yseries, options)
-    return "" unless options[:labels] == :minmax
+    return "" unless options[:labels] == :startend
     min = yseries[0]
     max = yseries[-1]
     mintext = options[:label_formatter].call(min, 0)
     maxtext = options[:label_formatter].call(max, -1)
+    label_at(-4,      @yaxis.scale(min), mintext, 'left') +
+    label_at(WIDTH+4, @yaxis.scale(max), maxtext, 'right')
+  end
+  def label_at(x, y, text, side)
     %{
-    <g transform='translate(0, #{@yaxis.scale(min)-6}) scale(1,-1)'>
-      <text class='series_label left' x='-4' y='0'>#{mintext}</text>
-    </g>
-    <g transform='translate(0, #{@yaxis.scale(max)-6}) scale(1,-1)'>
-      <text class='series_label right' x='#{WIDTH+4}' y='0'>#{maxtext}</text>
+    <g transform='translate(0, #{y-6}) scale(1,-1)'>
+      <text class='series_label #{side}' x='#{x}' y='0'>#{text}</text>
     </g>
     }
   end
@@ -240,7 +241,7 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => ylabel_formatter)}
 #{data.draw(xindex, total_data, "total", :labels => :none)}
-#{data.draw(xindex, urban_data, "urban", :labels => :minmax, :label_formatter => endlabel_formatter)}
+#{data.draw(xindex, urban_data, "urban", :labels => :startend, :label_formatter => endlabel_formatter)}
 </g>
 }
 end.join("\n")
