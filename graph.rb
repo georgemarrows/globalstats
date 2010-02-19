@@ -196,18 +196,32 @@ class DataSeries
   end
 end
 
+class Graph
+  def initialize(xaxis, yaxis)
+    @xaxis = xaxis
+    @yaxis = yaxis
+  end
+  def draw_background()
+    %{<rect class='background' x='0' y='0' width='#{@xaxis.size}' height='#{@yaxis.size}'/>}
+  end
+  def draw_forecast(start, xend)
+    fcstx     = @xaxis.scale(start)
+    fcstwidth = @xaxis.scale(xend) - fcstx
+    %{<rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{@yaxis.size}'/>}
+  end
+end
+
 data = DataSeries.new(XAXIS, YAXIS)
+graph = Graph.new(XAXIS, YAXIS)
 
 index = 0
 graphs = cities.map do |city_data, name|
-  fcstx = XAXIS.scale(2010)
-  fcstwidth = XAXIS.scale(2020) - fcstx
 
   %{
 <g transform="scale(1,-1) translate(#{(2 * WIDTH * (index+=1) )}, -500)  ">
 <g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
-<rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
-<rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
+#{graph.draw_background()}
+#{graph.draw_forecast(2010, 2020)}
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{data.draw(xindex, city_data, "cities", :labels => :startend, :label_formatter => proc {|x, i| ((x/100.0).round()/10.0).to_s + "m"}) }
 
@@ -223,9 +237,7 @@ graphs += total_urban.map_with_index do |data_and_name, index|
   else
     proc {|x,i| ((x/1000.0).round()).to_s + "m"}
   end
-  
-  fcstx = XAXIS.scale(2010)
-  fcstwidth = XAXIS.scale(2020) - fcstx
+
   yaxis = Axis.new(HEIGHT, 0, total_data.max, :y)
   data = DataSeries.new(XAXIS, yaxis)
   
@@ -236,8 +248,8 @@ graphs += total_urban.map_with_index do |data_and_name, index|
   %{
 <g transform="scale(1,-1) translate(#{(2 * WIDTH * (index + 1) )}, -200)  ">
 <g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
-<rect class='background' x='0' y='0' width='#{WIDTH}' height='#{HEIGHT}'/>
-<rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
+#{graph.draw_background()}
+#{graph.draw_forecast(2010, 2020)}
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{data.draw(xindex, total_data, "total", :labels => :startend, :label_formatter => ylabel_formatter)}
 #{data.draw(xindex, urban_data, "urban", :labels => :startend, :label_formatter => endlabel_formatter)}
