@@ -161,7 +161,9 @@ class DataSeries
     @xaxis = xaxis
     @yaxis = yaxis
   end
-  def draw(xseries, yseries, cssclass)
+  def draw(xseries, yseries, cssclass, options={})
+    options = {:labels => :none,
+               :label_formatter => proc {|x| x}}.merge(options)
     paired = []
     xseries.each_with_index do |x, k|
       paired << [x, yseries[k]]
@@ -173,7 +175,22 @@ class DataSeries
       "#{tmp} #{@xaxis.scale(x)} #{@yaxis.scale(y)}"
     end.join(" ")
 
-    "<path class='data #{cssclass}' d='#{graph_path}' />"
+    "<path class='data #{cssclass}' d='#{graph_path}' />" + draw_labels(xseries, yseries, options)
+  end
+  def draw_labels(xseries, yseries, options)
+    return "" unless options[:labels] == :minmax
+    min = yseries[0]
+    max = yseries[-1]
+    mintext = options[:label_formatter].call(min, 0)
+    maxtext = options[:label_formatter].call(max, -1)
+    %{
+    <g transform='translate(0, #{@yaxis.scale(min)-6}) scale(1,-1)'>
+      <text class='series_label left' x='-4' y='0'>#{mintext}</text>
+    </g>
+    <g transform='translate(0, #{@yaxis.scale(max)-6}) scale(1,-1)'>
+      <text class='series_label right' x='#{WIDTH+4}' y='0'>#{maxtext}</text>
+    </g>
+    }
   end
 end
 
@@ -191,7 +208,7 @@ graphs = cities.map do |city_data, name|
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{YAXIS.draw(city_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| ((x/100.0).round()/10.0).to_s + "m"})}
-#{data.draw(xindex, city_data, "cities")}
+#{data.draw(xindex, city_data, "cities", :labels => :none)}
 
 </g>
 }
@@ -211,9 +228,10 @@ graphs += total_urban.map_with_index do |data_and_name, index|
   yaxis = Axis.new(HEIGHT, 0, total_data.max, :y)
   data = DataSeries.new(XAXIS, yaxis)
   
-  urban_percent_start = (100.0 * urban_data[0] / total_data[0]).round().to_s + "%"
-  urban_percent_end   = (100.0 * urban_data[-1] / total_data[-1]).round().to_s + "%"
-  
+  endlabel_formatter = proc do |val, index| 
+                         (100.0 * val / total_data[index]).round().to_s + "%"
+                       end
+
   %{
 <g transform="scale(1,-1) translate(#{(2 * WIDTH * (index + 1) )}, -200)  ">
 <g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{name}</text></g>
@@ -221,14 +239,8 @@ graphs += total_urban.map_with_index do |data_and_name, index|
 <rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{HEIGHT}'/>
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{yaxis.draw(total_data, :ticks_every => :min_max_only, :label_formatter => ylabel_formatter)}
-#{data.draw(xindex, total_data, "total")}
-#{data.draw(xindex, urban_data, "urban")}
-<g transform='translate(0, #{yaxis.scale(urban_data.min)-6}) scale(1,-1)'>
-<text class='series_label left' x='-4' y='0'>#{urban_percent_start}</text>
-</g>
-<g transform='translate(0, #{yaxis.scale(urban_data.max)-6}) scale(1,-1)'>
-<text class='series_label right' x='#{WIDTH+4}' y='0'>#{urban_percent_end}</text>
-</g>
+#{data.draw(xindex, total_data, "total", :labels => :none)}
+#{data.draw(xindex, urban_data, "urban", :labels => :minmax, :label_formatter => endlabel_formatter)}
 </g>
 }
 end.join("\n")
