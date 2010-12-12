@@ -8,7 +8,7 @@ XMIN = xindex.min
 XMAX = xindex.max
          
 YMIN = 0
-YMAX = 30
+YMAX = 27
 
 TICK_SIZE = 3
 
@@ -30,9 +30,12 @@ graphs = x.map_with_index do |xx, lno|
 country = xx[0]
 country_data = xx[1..20]
 
+graphx = 4.5 * WIDTH + 2 * WIDTH * (lno % 5)
+graphy = 2 * HEIGHT * (lno / 5)
+
 %{
-<g transform="scale(1,-1) translate(#{(2 * WIDTH * (lno) )}, -500)  ">
-<g transform='translate(0,#{HEIGHT + 20}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{country}</text></g>
+<g transform="scale(1,-1) translate(#{graphx}, #{-graphy-500})  ">
+<g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='#{WIDTH/2}' y='0'>#{country}</text></g>
 #{graph.draw_background()}
 #{XAXIS.draw(xindex, :ticks_every => 2)} 
 #{data.draw(xindex, country_data, "cities", :labels => :startend, :label_formatter => proc {|x, i| x.to_s + "%"}) }
@@ -70,8 +73,7 @@ puts <<END
            stroke: rgb(200,0,0);
            fill: none;
          }
-                  text {
-          /* stroke: #8FAC8F; */
+         text {
            fill: rgb(0,0,0); 
            font-family: "Helvetica Neue LT Std";
            font-size: 16px;
