@@ -42,7 +42,8 @@ graphx, graphy = graphpos(lno, 1)
 <g transform="scale(1,-1) translate(#{graphx}, #{-graphy-500})  ">
 <g transform='translate(0,#{HEIGHT + 10}) scale(1,-1)'><text class='title' x='#{0}' y='0'>#{country[1..-1]}</text></g>
 #{graph.draw_background()}
-#{XAXIS.draw(xindex, :ticks_every => 2)}
+#{graph.draw_gridlines(:y, 10)}
+#{XAXIS.draw(xindex, :ticks_every => 5)}
 #{YAXIS.draw(country_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| x.to_s + "%"}) }
 #{data.draw(xindex, country_data, "prevalence", :labels => :none)}
 </g>
@@ -76,7 +77,7 @@ graphx, graphy = graphpos(lno, 2)
 <g transform="scale(1,-1) translate(#{graphx}, #{-graphy-500})  ">
 
 #{graph.draw_background()}
-#{XAXIS.draw(xindex, :ticks_every => 2)} 
+#{XAXIS.draw(xindex, :ticks_every => 5)} 
 #{yaxis.draw(country_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| ((x/1000.0).round()).to_s + "k"})}
 #{data.draw(xindex, country_data, "newinfections", :labels => :none)}
 </g>
@@ -116,14 +117,11 @@ graphx, graphy = graphpos(lno, 3)
 
 %{
 <g transform="scale(1,-1) translate(#{graphx}, #{-graphy-500})  ">
-
 #{graph.draw_background()}
+#{graph.draw_gridlines(:y, 20)}
 #{xaxis.draw(xindex, :ticks_every => 1)} 
-
 #{yaxis.draw(country_data, :ticks_every => :min_max_only, :label_formatter => proc {|x| x.round().to_s + "%"})}
 #{data.draw(xindex, country_data, "art", :labels => :none)}
-
-
 </g>
 }	
 end.join("\n")
@@ -155,17 +153,25 @@ puts <<END
      <defs>
        <style type="text/css"><![CDATA[
          .background {
-           fill: rgb(251,251,251);
-           stroke-width: 0.25pt;
+           /*fill: rgb(240,240,240);*/
+           fill: rgb(255,255,255);
+           stroke: rgb(240,240,240);
+           stroke-width: 1pt;
          }
        
          line.axis {
-	   stroke: rgb(50,50,50);
-           stroke-width: 0.5pt;      
+	   stroke: rgb(150,150,150);
+           stroke-width: 1pt;      
+         }
+
+         line.gridlines {
+/*	   stroke: rgb(255,255,255); */
+           stroke: rgb(240,240,240);
+           stroke-width: 1pt;      
          }
 
          .data {
-           stroke-width: 1pt;
+           stroke-width: 2pt;
            stroke: rgb(200,0,0);
            fill: none;
          }
@@ -178,7 +184,7 @@ puts <<END
          text {
            fill: rgb(50,50,50);
            font-family: "Helvetica Neue LT Std", "Futura Bk";
-           font-size: 14pt;
+           font-size: 16pt;
          }
          text.title {
            font-size: 30pt;

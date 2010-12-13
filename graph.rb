@@ -9,7 +9,7 @@ class Array
 end
 
 class Axis
-  attr_reader :size
+  attr_reader :size, :min, :max
   def initialize(size, min, max, direction)
     @size = size
     @min = min
@@ -74,7 +74,7 @@ class Axis
   def label_at(coord, text, minmax)
     translate = case @direction
     when :x
-      [coord, -8-16]
+      [coord + (minmax == :min ? -4 : 4), -8-16]
     when :y
       [-8, coord-6]
     end.join(',')
@@ -138,5 +138,22 @@ class Graph
     fcstx     = @xaxis.scale(start)
     fcstwidth = @xaxis.scale(xend) - fcstx
     %{<rect class='forecast' x='#{fcstx}' y='0' width='#{fcstwidth}' height='#{@yaxis.size}'/>}
+  end
+  def draw_gridlines(direction, gap)
+    mainax, otherax = case direction
+                      when :x
+                        [@xaxis, @yaxis]
+                      when :y
+                        [@yaxis, @xaxis]
+
+                      end
+    x, y = mainax.directions
+    gridlines = []
+    (mainax.min..mainax.max).step(gap) do |val|
+
+      pos = mainax.scale(val)
+      gridlines << %{<line class='gridlines' #{y}1='0' #{x}1='#{pos}' #{y}2='#{otherax.size}' #{x}2='#{pos}'/>}
+    end
+    gridlines.join("\n")
   end
 end
