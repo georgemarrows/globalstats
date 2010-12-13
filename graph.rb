@@ -47,9 +47,9 @@ class Axis
     x,y = directions  
     min, max = scale(data.min), scale(data.max)
     %{
-      <line class='axis line' #{x}1='#{min}' #{y}1='-1' #{x}2='#{max}' #{y}2='-1' />      
-      <line class='axis tick' #{x}1='#{min}' #{y}1='-1' #{x}2='#{min}' #{y}2='#{-1-TICK_SIZE}' />
-      <line class='axis tick' #{x}1='#{max}' #{y}1='-1' #{x}2='#{max}' #{y}2='#{-1-TICK_SIZE}' />      
+      <line class='axis line' #{x}1='#{min}' #{y}1='0' #{x}2='#{max}' #{y}2='0' />      
+      <line class='axis tick' #{x}1='#{min}' #{y}1='0' #{x}2='#{min}' #{y}2='#{-TICK_SIZE}' />
+      <line class='axis tick' #{x}1='#{max}' #{y}1='0' #{x}2='#{max}' #{y}2='#{-TICK_SIZE}' />      
     }
   end
   def draw_all_ticks(data, skip)
@@ -68,19 +68,19 @@ class Axis
   end
   def draw_labels(data, options)
     label_formatter = options[:label_formatter]
-    label_at(scale(data.min), label_formatter.call(data.min)) + 
-    label_at(scale(data.max), label_formatter.call(data.max))
+    label_at(scale(data.min), label_formatter.call(data.min), :min) + 
+    label_at(scale(data.max), label_formatter.call(data.max), :max)
   end
-  def label_at(coord, text)
+  def label_at(coord, text, minmax)
     translate = case @direction
     when :x
       [coord, -8-16]
     when :y
-      [-8, coord-4]
+      [-8, coord-6]
     end.join(',')
 
     %{ <g transform='translate(#{translate}) scale(1,-1)'>
-         <text class='axis #{@direction}label' x='0' y='0'>#{text}</text>
+         <text class='axis #{@direction}label #{minmax}' x='0' y='0'>#{text}</text>
        </g> }
   end
 
