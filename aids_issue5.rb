@@ -155,18 +155,18 @@ puts <<END
          .background {
            /*fill: rgb(240,240,240);*/
            fill: rgb(255,255,255);
-           stroke: rgb(240,240,240);
+           stroke: rgb(150,150,150);
            stroke-width: 1pt;
          }
        
          line.axis {
-	   stroke: rgb(150,150,150);
+	   stroke: rgb(0,0,0);
            stroke-width: 1pt;      
          }
 
          line.gridlines {
 /*	   stroke: rgb(255,255,255); */
-           stroke: rgb(240,240,240);
+           stroke: rgb(150,150,150);
            stroke-width: 1pt;      
          }
 
