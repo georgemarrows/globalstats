@@ -69,12 +69,27 @@ class Axis
   def draw_labels(data, options)
     label_formatter = options[:label_formatter]
     label_at(scale(data.min), label_formatter.call(data.min), :min) + 
-    label_at(scale(data.max), label_formatter.call(data.max), :max)
+    label_at(scale(data.max), label_formatter.call(data.max), :max) +
+    if options[:all_labels] == true
+        data[1..-2].map do |d|
+        	label_at(scale(d), label_formatter.call(d), :mid)
+        end.join("\n")
+    else
+	""
+    end
   end
   def label_at(coord, text, minmax)
     translate = case @direction
     when :x
-      [coord + (minmax == :min ? -4 : 4), -8-16]
+    	    offset = case minmax
+                     when :min
+                         -4
+                     when :max
+                         4
+                     when :mid
+                         0
+                     end
+      [coord + offset, -8-16]
     when :y
       [-8, coord-6]
     end.join(',')
@@ -123,6 +138,22 @@ class DataSeries
       <text class='series_label #{side}' x='#{x}' y='0'>#{text}</text>
     </g>
     }
+  end
+end
+
+class Histogram
+  def initialize(xaxis, yaxis)
+    @xaxis = xaxis
+    @yaxis = yaxis
+  end
+  def draw(data, xextr, yextr, cls, options={})
+    options = {}.merge(options)
+    graph_path = data.map do |val|
+    	    x = @xaxis.scale(xextr.call(val))
+    	    y = @yaxis.scale(yextr.call(val))
+      c = cls.call(val)
+      "<circle class='data #{c}' cx='#{x}' cy='#{y}' r='#{5}'/>"
+      end.join("\n")
   end
 end
 
